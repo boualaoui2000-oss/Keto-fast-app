@@ -35,7 +35,7 @@ jobs:
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+          firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
           projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
 
       # Ici, les étapes pour Cloud Run dépendent de votre configuration GCP.
