@@ -12,6 +12,8 @@
         "age": { "type": "number" },
         "weight": { "type": "number" },
         "height": { "type": "number" },
+        "targetWeight": { "type": "number" },
+        "programType": { "type": "string", "enum": ["fasting", "keto", "both"] },
         "gender": { "type": "string", "enum": ["male", "female", "other"] },
         "goal": { "type": "string", "enum": ["lose", "maintain", "gain"] },
         "activityLevel": { "type": "string", "enum": ["sedentary", "light", "moderate", "active", "very_active"] },

@@ -1,6 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
     function isAuthenticated() {
       return request.auth != null;
     }
@@ -13,25 +16,88 @@ service cloud.firestore {
       return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
     }
 
+    function isValidTimestamp(ts) {
+      return ts is string && ts.matches("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}.*Z?$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
     function isValidUserProfile(data) {
-      return data.uid == request.auth.uid &&
+      let requiredFields = ['uid', 'email', 'goal', 'activityLevel', 'dietPreference', 'fastingProtocol', 'ketoLevel', 'targetMacros', 'onboardingCompleted', 'createdAt', 'updatedAt'];
+      return data.keys().hasAll(requiredFields) &&
+             data.uid == request.auth.uid &&
              isValidEmail(data.email) &&
              data.goal in ['lose', 'maintain', 'gain'] &&
              data.activityLevel in ['sedentary', 'light', 'moderate', 'active', 'very_active'] &&
              data.dietPreference in ['omnivore', 'vegetarian', 'vegan'] &&
              data.ketoLevel in ['beginner', 'intermediate', 'advanced'] &&
              data.targetMacros is map &&
-             data.onboardingCompleted is bool;
+             data.targetMacros.keys().hasAll(['calories', 'protein', 'carbs', 'fats']) &&
+             data.onboardingCompleted is bool &&
+             isValidTimestamp(data.createdAt) &&
+             isValidTimestamp(data.updatedAt) &&
+             (data.programType in ['fasting', 'keto', 'both']);
     }
 
+    function isValidFastingSession(data) {
+      let requiredFields = ['id', 'userId', 'startTime', 'targetDuration', 'status', 'type'];
+      return data.keys().hasAll(requiredFields) &&
+             data.userId == request.auth.uid &&
+             isValidTimestamp(data.startTime) &&
+             data.targetDuration is number &&
+             data.status in ['active', 'completed', 'interrupted'] &&
+             data.type is string;
+    }
+
+    function isValidMealLog(data) {
+      let requiredFields = ['id', 'userId', 'date', 'name', 'calories', 'protein', 'carbs', 'fats', 'type'];
+      return data.keys().hasAll(requiredFields) &&
+             data.userId == request.auth.uid &&
+             isValidTimestamp(data.date) &&
+             data.name is string && data.name.size() < 100 &&
+             data.calories is number &&
+             data.protein is number &&
+             data.carbs is number &&
+             data.fats is number &&
+             data.type in ['breakfast', 'lunch', 'dinner', 'snack'];
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
     match /users/{userId} {
       allow read: if isOwner(userId);
       allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
       allow update: if isOwner(userId) && isValidUserProfile(request.resource.data) && 
-                      request.resource.data.uid == resource.data.uid;
+                      request.resource.data.uid == resource.data.uid &&
+                      request.resource.data.createdAt == resource.data.createdAt;
 
-      match /{allSubcollections=**} {
-        allow read, write: if isOwner(userId);
+      match /fastingSessions/{sessionId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidFastingSession(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /mealLogs/{logId} {
+        allow read: if isOwner(userId);
+        allow create, update: if isOwner(userId) && isValidMealLog(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+
+      match /hydrationLogs/{logId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
+      match /weightLogs/{logId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
+      }
+
+      match /workoutLogs/{logId} {
+        allow read: if isOwner(userId);
+        allow write: if isOwner(userId);
       }
     }
   }
