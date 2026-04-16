@@ -30,13 +30,19 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
 
-      # Déploiement Firebase (Rules & Indexes)
+      - name: Create GCP Credentials File
+        run: echo "${{ secrets.GCP_SA_KEY }}" > gcp-key.json
+
       - name: Deploy Firebase Rules
-        uses: FirebaseExtended/action-hosting-deploy@v0
-        with:
-          repoToken: '${{ secrets.GITHUB_TOKEN }}'
-          firebaseServiceAccount: '${{ secrets.GCP_SA_KEY }}'
-          projectId: ${{ secrets.FIREBASE_PROJECT_ID }}
+        run: npx firebase-tools deploy --only firestore:rules --project ${{ secrets.FIREBASE_PROJECT_ID }}
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
+
+      # Étape additionnelle : Préparation pour Cloud Run
+      # Pour déployer sur Cloud Run, vous devez :
+      # 1. Créer un Dockerfile (je vais le créer pour vous)
+      # 2. Configurer Artifact Registry sur GCP
+      # 3. Utiliser 'google-github-actions/auth' et 'google-github-actions/deploy-cloudrun'
 
       # Ici, les étapes pour Cloud Run dépendent de votre configuration GCP.
       # Généralement, vous utiliseriez l'action 'google-github-actions/deploy-cloudrun'
