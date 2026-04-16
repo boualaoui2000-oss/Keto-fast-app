@@ -1,0 +1,136 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "age": { "type": "number" },
+        "weight": { "type": "number" },
+        "height": { "type": "number" },
+        "gender": { "type": "string", "enum": ["male", "female", "other"] },
+        "goal": { "type": "string", "enum": ["lose", "maintain", "gain"] },
+        "activityLevel": { "type": "string", "enum": ["sedentary", "light", "moderate", "active", "very_active"] },
+        "dietPreference": { "type": "string", "enum": ["omnivore", "vegetarian", "vegan"] },
+        "allergies": { "type": "array", "items": { "type": "string" } },
+        "healthConditions": { "type": "array", "items": { "type": "string" } },
+        "fastingProtocol": { "type": "string" },
+        "ketoLevel": { "type": "string", "enum": ["beginner", "intermediate", "advanced"] },
+        "targetMacros": {
+          "type": "object",
+          "properties": {
+            "calories": { "type": "number" },
+            "protein": { "type": "number" },
+            "carbs": { "type": "number" },
+            "fats": { "type": "number" }
+          }
+        },
+        "onboardingCompleted": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email", "goal", "activityLevel", "dietPreference", "fastingProtocol", "ketoLevel", "targetMacros", "onboardingCompleted", "createdAt", "updatedAt"]
+    },
+    "FastingSession": {
+      "title": "FastingSession",
+      "description": "A single fasting session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "startTime": { "type": "string", "format": "date-time" },
+        "endTime": { "type": "string", "format": "date-time" },
+        "targetDuration": { "type": "number" },
+        "status": { "type": "string", "enum": ["active", "completed", "interrupted"] },
+        "type": { "type": "string" }
+      },
+      "required": ["id", "userId", "startTime", "targetDuration", "status", "type"]
+    },
+    "MealLog": {
+      "title": "MealLog",
+      "description": "Log of a meal consumed",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "name": { "type": "string" },
+        "calories": { "type": "number" },
+        "protein": { "type": "number" },
+        "carbs": { "type": "number" },
+        "fats": { "type": "number" },
+        "type": { "type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"] }
+      },
+      "required": ["id", "userId", "date", "name", "calories", "protein", "carbs", "fats", "type"]
+    },
+    "HydrationLog": {
+      "title": "HydrationLog",
+      "description": "Log of water intake",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "amount": { "type": "number" }
+      },
+      "required": ["id", "userId", "date", "amount"]
+    },
+    "WeightLog": {
+      "title": "WeightLog",
+      "description": "Log of body weight",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "weight": { "type": "number" }
+      },
+      "required": ["id", "userId", "date", "weight"]
+    },
+    "WorkoutLog": {
+      "title": "WorkoutLog",
+      "description": "Log of physical activity",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "type": { "type": "string" },
+        "duration": { "type": "number" },
+        "intensity": { "type": "string", "enum": ["low", "medium", "high"] },
+        "caloriesBurned": { "type": "number" }
+      },
+      "required": ["id", "userId", "date", "type", "duration", "intensity", "caloriesBurned"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile document"
+    },
+    "/users/{userId}/fastingSessions/{sessionId}": {
+      "schema": "FastingSession",
+      "description": "User's fasting sessions"
+    },
+    "/users/{userId}/mealLogs/{logId}": {
+      "schema": "MealLog",
+      "description": "User's meal logs"
+    },
+    "/users/{userId}/hydrationLogs/{logId}": {
+      "schema": "HydrationLog",
+      "description": "User's hydration logs"
+    },
+    "/users/{userId}/weightLogs/{logId}": {
+      "schema": "WeightLog",
+      "description": "User's weight logs"
+    },
+    "/users/{userId}/workoutLogs/{logId}": {
+      "schema": "WorkoutLog",
+      "description": "User's workout logs"
+    }
+  }
+}

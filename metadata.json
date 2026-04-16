@@ -1,0 +1,7 @@
+{
+  "name": "KetoFast AI",
+  "description": "Application complète de jeûne intermittent et nutrition Keto avec coaching IA, suivi de macros et programmes sportifs.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

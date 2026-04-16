@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isValidEmail(email) {
+      return email is string && email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function isValidUserProfile(data) {
+      return data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.goal in ['lose', 'maintain', 'gain'] &&
+             data.activityLevel in ['sedentary', 'light', 'moderate', 'active', 'very_active'] &&
+             data.dietPreference in ['omnivore', 'vegetarian', 'vegan'] &&
+             data.ketoLevel in ['beginner', 'intermediate', 'advanced'] &&
+             data.targetMacros is map &&
+             data.onboardingCompleted is bool;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUserProfile(request.resource.data);
+      allow update: if isOwner(userId) && isValidUserProfile(request.resource.data) && 
+                      request.resource.data.uid == resource.data.uid;
+
+      match /{allSubcollections=**} {
+        allow read, write: if isOwner(userId);
+      }
+    }
+  }
+}
