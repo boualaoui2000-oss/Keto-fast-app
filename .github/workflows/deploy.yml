@@ -30,13 +30,13 @@ jobs:
           VITE_FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
           VITE_FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
 
-      - name: Create GCP Credentials File
-        run: echo "${{ secrets.GCP_SA_KEY }}" > gcp-key.json
+      - name: Google Auth
+        uses: 'google-github-actions/auth@v2'
+        with:
+          credentials_json: '${{ secrets.GCP_SA_KEY }}'
 
       - name: Deploy Firebase Rules
         run: npx firebase-tools deploy --only firestore:rules --project ${{ secrets.FIREBASE_PROJECT_ID }}
-        env:
-          GOOGLE_APPLICATION_CREDENTIALS: gcp-key.json
 
       # Étape additionnelle : Préparation pour Cloud Run
       # Pour déployer sur Cloud Run, vous devez :
