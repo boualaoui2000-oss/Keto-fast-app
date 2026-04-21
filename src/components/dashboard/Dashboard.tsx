@@ -10,6 +10,8 @@ import { Button } from '@/components/ui/button';
 import { Utensils, Dumbbell, Brain, Zap, Clock, Info, TrendingDown, Sparkles, ChevronRight } from 'lucide-react';
 import { RECIPES } from '@/data/recipes';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { format, differenceInDays, differenceInWeeks, parseISO } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface DashboardProps {
   userProfile: any;
@@ -33,6 +35,12 @@ export default function Dashboard({
 
   // Generate dynamic weekly data based on user weight
   const userWeight = userProfile.weight || 85;
+  
+  const createdDate = userProfile.createdAt ? parseISO(userProfile.createdAt) : new Date();
+  const dayCount = differenceInDays(new Date(), createdDate) + 1;
+  const weekCount = differenceInWeeks(new Date(), createdDate) + 1;
+  const formattedDate = format(new Date(), 'EEEE d MMMM', { locale: fr });
+
   const weeklyData = [
     { day: 'Lun', weight: userWeight + 1.1 },
     { day: 'Mar', weight: userWeight + 0.8 },
@@ -66,8 +74,10 @@ export default function Dashboard({
     <div className="max-w-4xl mx-auto p-4 space-y-6 pb-24">
       <header className="flex justify-between items-start">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Bonjour, {userProfile.displayName || 'Ketoer'} !</h1>
-          <p className="text-sm text-muted-foreground">Dimanche 12 Avril • Jour 12 de votre parcours</p>
+          <h1 className="text-2xl font-bold tracking-tight uppercase">Bonjour, {userProfile.displayName || 'Ketoer'} !</h1>
+          <p className="text-sm text-muted-foreground capitalize">
+            {formattedDate} • Semaine {weekCount}, Jour {dayCount}
+          </p>
         </div>
         <div className="flex flex-col items-end gap-1">
           <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold shadow-sm border border-yellow-200">

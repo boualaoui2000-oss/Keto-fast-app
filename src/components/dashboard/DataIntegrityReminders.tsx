@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { AlertCircle, Calendar, Scale, Ruler, CheckCircle2, XCircle } from 'lucide-react';
 import { UserProfile } from '@/types';
-import { differenceInDays, parseISO, format, isMonday } from 'date-fns';
+import { differenceInDays, parseISO, format, isMonday, eachDayOfInterval, subDays } from 'date-fns';
+import { fr } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'motion/react';
 import { toast } from 'sonner';
 
@@ -13,7 +14,8 @@ interface DataIntegrityRemindersProps {
 }
 
 export default function DataIntegrityReminders({ userProfile, onNavigate }: DataIntegrityRemindersProps) {
-  const [missingDays, setMissingDays] = useState<number>(0);
+  const [missingDaysCount, setMissingDaysCount] = useState<number>(0);
+  const [missingDates, setMissingDates] = useState<string[]>([]);
   const [needsWeight, setNeedsWeight] = useState(false);
   const [needsMeasurements, setNeedsMeasurements] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
@@ -22,19 +24,24 @@ export default function DataIntegrityReminders({ userProfile, onNavigate }: Data
     if (!userProfile) return;
 
     const today = new Date();
+    let startDate: Date;
     
     // Check missing days since last meal log
     if (userProfile.lastMealLogAt) {
-      const lastMeal = parseISO(userProfile.lastMealLogAt);
-      const days = differenceInDays(today, lastMeal);
-      if (days > 1) {
-        setMissingDays(days);
-      }
+      startDate = parseISO(userProfile.lastMealLogAt);
     } else {
-      // First time? check creation date
-      const created = parseISO(userProfile.createdAt);
-      const days = differenceInDays(today, created);
-      if (days > 0) setMissingDays(days);
+      startDate = parseISO(userProfile.createdAt);
+    }
+
+    const days = differenceInDays(today, startDate);
+    if (days > 1) {
+      setMissingDaysCount(days);
+      // List missing dates (excluding today and the last logged day)
+      const interval = eachDayOfInterval({
+        start: subDays(today, days - 1),
+        end: subDays(today, 1)
+      });
+      setMissingDates(interval.map(d => format(d, 'eee d MMM', { locale: fr })));
     }
 
     // Weight reminder: Recommended once a week, ideally Monday
@@ -72,7 +79,7 @@ export default function DataIntegrityReminders({ userProfile, onNavigate }: Data
   }, [userProfile]);
 
   if (isDismissed) return null;
-  if (missingDays <= 0 && !needsWeight && !needsMeasurements) return null;
+  if (missingDaysCount <= 0 && !needsWeight && !needsMeasurements) return null;
 
   return (
     <AnimatePresence>
@@ -102,20 +109,29 @@ export default function DataIntegrityReminders({ userProfile, onNavigate }: Data
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {missingDays > 0 && (
-              <div className="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm border border-red-100">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-red-50 rounded-lg">
-                    <Calendar className="h-4 w-4 text-red-500" />
+            {missingDaysCount > 0 && (
+              <div className="flex flex-col gap-3 p-3 bg-white rounded-xl shadow-sm border border-red-100">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-red-50 rounded-lg">
+                      <Calendar className="h-4 w-4 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold">{missingDaysCount} jours sans suivi alimentaire</p>
+                      <p className="text-[10px] text-muted-foreground">Rattrapez les jours suivants :</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs font-bold">{missingDays} jours sans repas</p>
-                    <p className="text-[10px] text-muted-foreground">Rattrapez vos logs alimentaires</p>
-                  </div>
+                  <Button size="sm" variant="outline" className="h-8 text-xs border-red-200 text-red-700 hover:bg-red-50" onClick={() => onNavigate('nutrition')}>
+                    Remplir
+                  </Button>
                 </div>
-                <Button size="sm" variant="outline" className="h-8 text-xs border-red-200 text-red-700 hover:bg-red-50" onClick={() => onNavigate('nutrition')}>
-                  Remplir
-                </Button>
+                <div className="flex flex-wrap gap-2">
+                  {missingDates.map((date, idx) => (
+                    <span key={idx} className="text-[9px] bg-red-50 text-red-600 px-2 py-0.5 rounded-full border border-red-100">
+                      {date}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
 

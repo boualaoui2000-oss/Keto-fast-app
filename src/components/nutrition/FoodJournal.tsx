@@ -7,6 +7,8 @@ import { UserProfile } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
+import { differenceInDays, parseISO, eachDayOfInterval, subDays, format } from 'date-fns';
+import { fr } from 'date-fns/locale';
 
 interface FoodEntry {
   id: string;
@@ -21,6 +23,14 @@ interface FoodEntry {
 
 export default function FoodJournal({ userProfile, onUpdateProfile }: { userProfile: UserProfile, onUpdateProfile?: (data: Partial<UserProfile>) => void }) {
   const [selectedDate, setSelectedDate] = useState(new Date());
+  
+  const lastMealDate = userProfile.lastMealLogAt ? parseISO(userProfile.lastMealLogAt) : parseISO(userProfile.createdAt);
+  const diffDays = differenceInDays(new Date(), lastMealDate);
+  const missingDates = diffDays > 1 ? eachDayOfInterval({
+    start: subDays(new Date(), diffDays - 1),
+    end: subDays(new Date(), 1)
+  }) : [];
+
   const [entries, setEntries] = useState<FoodEntry[]>([
     { id: '1', name: 'Œufs brouillés au beurre', calories: 320, carbs: 2, protein: 18, fats: 26, amount: '2 œufs', time: '08:30' },
     { id: '2', name: 'Avocat entier', calories: 240, carbs: 3, protein: 2, fats: 22, amount: '150g', time: '10:15' },
@@ -86,6 +96,25 @@ export default function FoodJournal({ userProfile, onUpdateProfile }: { userProf
           onChange={(e) => setSelectedDate(new Date(e.target.value))}
         />
       </div>
+
+      {missingDates.length > 0 && (
+        <div className="p-3 bg-red-50 border border-red-100 rounded-xl space-y-2">
+          <p className="text-[10px] font-bold text-red-600 uppercase">Jours à rattraper :</p>
+          <div className="flex flex-wrap gap-2">
+            {missingDates.map((date, idx) => (
+              <Button 
+                key={idx} 
+                variant="outline" 
+                size="sm" 
+                className="h-7 text-[10px] bg-white hover:bg-red-100 border-red-200 text-red-700"
+                onClick={() => setSelectedDate(date)}
+              >
+                {format(date, 'eee d MMMM', { locale: fr })}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MacroCard label="Calories" current={totalMacros.calories} target={userProfile.targetMacros.calories} unit="kcal" color="primary" />

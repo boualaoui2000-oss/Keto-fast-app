@@ -66,15 +66,25 @@ export default function App() {
     }
 
     const userDocRef = doc(db, 'users', user.uid);
+    let lastAccessUpdated = false;
 
     const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
       if (snapshot.exists()) {
         const profile = snapshot.data() as UserProfile;
         setUserProfile(profile);
         
-        // Update last access ONLY if profile exists
-        if (profile.onboardingCompleted) {
-          setDoc(userDocRef, { lastAccessAt: new Date().toISOString() }, { merge: true });
+        // Update last access ONLY ONCE per session to avoid loops
+        if (profile.onboardingCompleted && !lastAccessUpdated) {
+          lastAccessUpdated = true;
+          setDoc(userDocRef, { 
+            lastAccessAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString() 
+          }, { merge: true }).catch(err => {
+            console.error("Failed to update last access:", err, {
+              uid: user.uid,
+              profileKeys: Object.keys(profile)
+            });
+          });
         }
       } else {
         setUserProfile(null);
@@ -126,7 +136,10 @@ export default function App() {
   const handleUpdateProfile = async (data: Partial<UserProfile>) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, 'users', user.uid), { ...userProfile, ...data }, { merge: true });
+      await setDoc(doc(db, 'users', user.uid), { 
+        ...data, 
+        updatedAt: new Date().toISOString() 
+      }, { merge: true });
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `users/${user.uid}`);
     }
