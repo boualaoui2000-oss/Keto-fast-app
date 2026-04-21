@@ -14,7 +14,7 @@ const MOCK_MEASUREMENTS = [
   { date: '15/04', waist: 89, hips: 103.5, chest: 101 },
 ];
 
-export default function BodyMeasurements({ userProfile }: { userProfile: UserProfile }) {
+export default function BodyMeasurements({ userProfile, onUpdateProfile }: { userProfile: UserProfile, onUpdateProfile: (data: Partial<UserProfile>) => void }) {
   const [waist, setWaist] = useState('');
   const [hips, setHips] = useState('');
   const [chest, setChest] = useState('');
@@ -32,6 +32,9 @@ export default function BodyMeasurements({ userProfile }: { userProfile: UserPro
     setWaist('');
     setHips('');
     setChest('');
+    onUpdateProfile({
+      lastMeasurementAt: new Date().toISOString()
+    });
     toast.success("Mesures enregistrées !");
   };
 

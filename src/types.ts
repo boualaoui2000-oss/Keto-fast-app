@@ -18,6 +18,10 @@ export interface UserProfile {
   ketoLevel: 'beginner' | 'intermediate' | 'advanced';
   targetMacros: Macros;
   onboardingCompleted: boolean;
+  lastAccessAt?: string;
+  lastWeightAt?: string;
+  lastMeasurementAt?: string;
+  lastMealLogAt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -63,6 +67,20 @@ export interface WeightLog {
   userId: string;
   date: string;
   weight: number;
+}
+
+export interface MeasurementLog {
+  id: string;
+  userId: string;
+  date: string;
+  waist?: number; // cm
+  neck?: number; // cm
+  hips?: number; // cm
+  chest?: number; // cm
+  thighRight?: number; // cm
+  thighLeft?: number; // cm
+  armRight?: number; // cm
+  armLeft?: number; // cm
 }
 
 export interface WorkoutLog {

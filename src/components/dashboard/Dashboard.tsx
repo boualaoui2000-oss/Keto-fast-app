@@ -4,6 +4,7 @@ import MacrosDisplay from './MacrosDisplay';
 import HydrationTracker from './HydrationTracker';
 import QuickActions from './QuickActions';
 import WeeklyMealPlanner from './WeeklyMealPlanner';
+import DataIntegrityReminders from './DataIntegrityReminders';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Utensils, Dumbbell, Brain, Zap, Clock, Info, TrendingDown, Sparkles, ChevronRight } from 'lucide-react';
@@ -78,6 +79,8 @@ export default function Dashboard({
           </p>
         </div>
       </header>
+
+      <DataIntegrityReminders userProfile={userProfile} onNavigate={onNavigate} />
 
       {/* AI Insight Card */}
       <Card className="bg-gradient-to-r from-primary/10 via-primary/5 to-background border-primary/20 overflow-hidden relative">

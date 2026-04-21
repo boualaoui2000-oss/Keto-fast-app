@@ -66,9 +66,16 @@ export default function App() {
     }
 
     const userDocRef = doc(db, 'users', user.uid);
+
     const unsubscribe = onSnapshot(userDocRef, (snapshot) => {
       if (snapshot.exists()) {
-        setUserProfile(snapshot.data() as UserProfile);
+        const profile = snapshot.data() as UserProfile;
+        setUserProfile(profile);
+        
+        // Update last access ONLY if profile exists
+        if (profile.onboardingCompleted) {
+          setDoc(userDocRef, { lastAccessAt: new Date().toISOString() }, { merge: true });
+        }
       } else {
         setUserProfile(null);
       }
@@ -191,7 +198,7 @@ export default function App() {
         )}
         
         {activeTab === 'nutrition' && (
-          <NutritionDashboard userProfile={userProfile} />
+          <NutritionDashboard userProfile={userProfile} onUpdateProfile={handleUpdateProfile} />
         )}
 
         {activeTab === 'fasting' && (
@@ -203,7 +210,7 @@ export default function App() {
         )}
 
         {activeTab === 'analytics' && userProfile && (
-          <AnalyticsDashboard userProfile={userProfile} />
+          <AnalyticsDashboard userProfile={userProfile} onUpdateProfile={handleUpdateProfile} />
         )}
 
         {activeTab === 'profile' && (

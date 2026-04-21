@@ -7,7 +7,7 @@ import { Plus, Target, TrendingDown, Scale } from 'lucide-react';
 import { UserProfile } from '@/types';
 import { toast } from 'sonner';
 
-export default function WeightTracker({ userProfile }: { userProfile: UserProfile }) {
+export default function WeightTracker({ userProfile, onUpdateProfile }: { userProfile: UserProfile, onUpdateProfile: (data: Partial<UserProfile>) => void }) {
   const [weight, setWeight] = useState('');
   
   // Generate initial data based on user's current weight
@@ -47,6 +47,10 @@ export default function WeightTracker({ userProfile }: { userProfile: UserProfil
     };
     setData([...data, newEntry]);
     setWeight('');
+    onUpdateProfile({
+      weight: parseFloat(weight),
+      lastWeightAt: new Date().toISOString()
+    });
     toast.success("Poids enregistré !");
   };
 

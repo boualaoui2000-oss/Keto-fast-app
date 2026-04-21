@@ -9,9 +9,10 @@ import { UserProfile } from '@/types';
 
 interface AnalyticsDashboardProps {
   userProfile: UserProfile;
+  onUpdateProfile: (data: Partial<UserProfile>) => void;
 }
 
-export default function AnalyticsDashboard({ userProfile }: AnalyticsDashboardProps) {
+export default function AnalyticsDashboard({ userProfile, onUpdateProfile }: AnalyticsDashboardProps) {
   const [activeSubTab, setActiveSubTab] = useState('weight');
 
   return (
@@ -44,11 +45,11 @@ export default function AnalyticsDashboard({ userProfile }: AnalyticsDashboardPr
         </TabsList>
 
         <TabsContent value="weight" className="mt-0 focus-visible:outline-none">
-          <WeightTracker userProfile={userProfile} />
+          <WeightTracker userProfile={userProfile} onUpdateProfile={onUpdateProfile} />
         </TabsContent>
 
         <TabsContent value="measurements" className="mt-0 focus-visible:outline-none">
-          <BodyMeasurements userProfile={userProfile} />
+          <BodyMeasurements userProfile={userProfile} onUpdateProfile={onUpdateProfile} />
         </TabsContent>
 
         <TabsContent value="report" className="mt-0 focus-visible:outline-none">

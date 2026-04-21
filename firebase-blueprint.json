@@ -32,6 +32,10 @@
           }
         },
         "onboardingCompleted": { "type": "boolean" },
+        "lastAccessAt": { "type": "string", "format": "date-time" },
+        "lastWeightAt": { "type": "string", "format": "date-time" },
+        "lastMeasurementAt": { "type": "string", "format": "date-time" },
+        "lastMealLogAt": { "type": "string", "format": "date-time" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -107,6 +111,25 @@
         "caloriesBurned": { "type": "number" }
       },
       "required": ["id", "userId", "date", "type", "duration", "intensity", "caloriesBurned"]
+    },
+    "MeasurementLog": {
+      "title": "MeasurementLog",
+      "description": "Log of body measurements",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "waist": { "type": "number" },
+        "neck": { "type": "number" },
+        "hips": { "type": "number" },
+        "chest": { "type": "number" },
+        "thighRight": { "type": "number" },
+        "thighLeft": { "type": "number" },
+        "armRight": { "type": "number" },
+        "armLeft": { "type": "number" }
+      },
+      "required": ["id", "userId", "date"]
     }
   },
   "firestore": {
@@ -133,6 +156,10 @@
     "/users/{userId}/workoutLogs/{logId}": {
       "schema": "WorkoutLog",
       "description": "User's workout logs"
+    },
+    "/users/{userId}/measurementLogs/{logId}": {
+      "schema": "MeasurementLog",
+      "description": "User's body measurements history"
     }
   }
 }

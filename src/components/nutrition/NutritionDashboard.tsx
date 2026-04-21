@@ -9,9 +9,10 @@ import { UserProfile } from '@/types';
 
 interface NutritionDashboardProps {
   userProfile: UserProfile;
+  onUpdateProfile: (data: Partial<UserProfile>) => void;
 }
 
-export default function NutritionDashboard({ userProfile }: NutritionDashboardProps) {
+export default function NutritionDashboard({ userProfile, onUpdateProfile }: NutritionDashboardProps) {
   const [activeSubTab, setActiveSubTab] = useState('plan');
 
   return (
@@ -52,7 +53,7 @@ export default function NutritionDashboard({ userProfile }: NutritionDashboardPr
         </TabsContent>
 
         <TabsContent value="journal" className="mt-0 focus-visible:outline-none">
-          <FoodJournal userProfile={userProfile} />
+          <FoodJournal userProfile={userProfile} onUpdateProfile={onUpdateProfile} />
         </TabsContent>
 
         <TabsContent value="shopping" className="mt-0 focus-visible:outline-none">

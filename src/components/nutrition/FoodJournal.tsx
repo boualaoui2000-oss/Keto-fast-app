@@ -19,7 +19,8 @@ interface FoodEntry {
   time: string;
 }
 
-export default function FoodJournal({ userProfile }: { userProfile: UserProfile }) {
+export default function FoodJournal({ userProfile, onUpdateProfile }: { userProfile: UserProfile, onUpdateProfile?: (data: Partial<UserProfile>) => void }) {
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [entries, setEntries] = useState<FoodEntry[]>([
     { id: '1', name: 'Œufs brouillés au beurre', calories: 320, carbs: 2, protein: 18, fats: 26, amount: '2 œufs', time: '08:30' },
     { id: '2', name: 'Avocat entier', calories: 240, carbs: 3, protein: 2, fats: 22, amount: '150g', time: '10:15' },
@@ -47,6 +48,11 @@ export default function FoodJournal({ userProfile }: { userProfile: UserProfile 
     };
     setEntries([newEntry, ...entries]);
     setSearch('');
+    if (onUpdateProfile) {
+      onUpdateProfile({
+        lastMealLogAt: new Date().toISOString()
+      });
+    }
     toast.success("Aliment ajouté au journal");
   };
 
@@ -71,6 +77,16 @@ export default function FoodJournal({ userProfile }: { userProfile: UserProfile 
 
   return (
     <div className="space-y-6">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-xl font-bold">Journal Alimentaire</h2>
+        <Input 
+          type="date" 
+          className="w-40" 
+          value={selectedDate.toISOString().split('T')[0]} 
+          onChange={(e) => setSelectedDate(new Date(e.target.value))}
+        />
+      </div>
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <MacroCard label="Calories" current={totalMacros.calories} target={userProfile.targetMacros.calories} unit="kcal" color="primary" />
         <MacroCard label="Glucides" current={totalMacros.carbs} target={userProfile.targetMacros.carbs} unit="g" color="blue-500" />
